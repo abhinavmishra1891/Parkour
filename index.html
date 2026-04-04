@@ -1,60 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>Shadow Run — Endless Parkour</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <!-- The game canvas: all rendering happens here -->
-  <canvas id="gameCanvas"></canvas>
 
-  <!-- Overlay screens (start / game-over) sit on top of the canvas -->
-  <div id="ui">
+<canvas id="gameCanvas"></canvas>
 
-    <!-- ── START SCREEN ── -->
-    <div id="startScreen" class="screen active">
-      <div class="screen-inner">
-        <div class="logo-wrap">
-          <span class="logo-accent">⬛</span>
-          <h1 class="logo">SHADOW<br><span>RUN</span></h1>
+<div id="ui">
+
+  <!-- ══ START SCREEN ══ -->
+  <div id="startScreen" class="screen active">
+    <div class="screen-inner">
+      <div class="logo-wrap">
+        <span class="logo-icon">⬛</span>
+        <div>
+          <h1 class="logo">SHADOW<span>RUN</span></h1>
+          <p class="logo-sub">ENDLESS PARKOUR</p>
         </div>
-        <p class="tagline">Endless Parkour · Sprint into the void</p>
-        <div class="controls-hint">
-          <div class="key-row"><kbd>SPACE</kbd> / <kbd>↑</kbd> — Jump / Double Jump</div>
-          <div class="key-row"><kbd>↓</kbd> / <kbd>S</kbd> — Slide</div>
-          <div class="key-row">Tap / Swipe down on mobile</div>
-        </div>
-        <button id="startBtn" class="btn">START RUNNING</button>
-        <div class="hs-display">Best: <span id="startHs">0</span></div>
       </div>
-    </div>
 
-    <!-- ── GAME-OVER SCREEN ── -->
-    <div id="gameOverScreen" class="screen">
-      <div class="screen-inner">
-        <h2 class="over-title">YOU FELL</h2>
-        <div class="score-block">
-          <div class="score-label">SCORE</div>
-          <div class="score-value" id="finalScore">0</div>
-        </div>
-        <div class="score-block">
-          <div class="score-label">BEST</div>
-          <div class="score-value hs" id="finalHs">0</div>
-        </div>
-        <button id="restartBtn" class="btn">TRY AGAIN</button>
+      <div class="controls-grid">
+        <div class="ctrl-item"><kbd>SPACE / ↑</kbd><span>Jump</span></div>
+        <div class="ctrl-item"><kbd>SPACE ×2</kbd><span>Double Jump</span></div>
+        <div class="ctrl-item"><kbd>↓ / S</kbd><span>Slide</span></div>
+        <div class="ctrl-item"><span>👆 Tap / Swipe↓</span><span>Mobile</span></div>
       </div>
-    </div>
 
-    <!-- ── HUD (in-game) ── -->
-    <div id="hud">
-      <div id="scoreDisplay">0</div>
-      <div id="hsDisplay">BEST: <span id="hudHs">0</span></div>
-    </div>
+      <div class="skin-row-wrap">
+        <div class="skin-label">SKIN SELECT</div>
+        <div class="skin-row" id="startSkinRow"></div>
+      </div>
 
+      <button id="startBtn" class="btn btn-primary">▶&nbsp; START RUN</button>
+
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val" id="startHs">0</div><div class="stat-lbl">BEST</div></div>
+        <div class="stat"><div class="stat-val" id="startCoins">0</div><div class="stat-lbl">💰 COINS</div></div>
+      </div>
+
+      <button id="storeBtn" class="btn btn-secondary">🛒 STORE</button>
+    </div>
   </div>
 
-  <script src="game.js"></script>
+  <!-- ══ STORE SCREEN ══ -->
+  <div id="storeScreen" class="screen">
+    <div class="screen-inner store-inner">
+      <h2 class="store-title">STORE</h2>
+      <div class="coin-display">💰 <span id="storeCoinCount">0</span></div>
+
+      <div class="store-section">
+        <div class="store-heading">SKINS</div>
+        <div class="store-grid" id="skinGrid"></div>
+      </div>
+      <div class="store-section">
+        <div class="store-heading">TRAILS</div>
+        <div class="store-grid" id="trailGrid"></div>
+      </div>
+      <div class="store-section">
+        <div class="store-heading">POWER-UPS</div>
+        <div class="store-grid" id="boostGrid"></div>
+      </div>
+
+      <button id="storeCloseBtn" class="btn btn-secondary">← BACK</button>
+    </div>
+  </div>
+
+  <!-- ══ HUD ══ -->
+  <div id="hud">
+    <div id="hudLeft">
+      <div id="scoreDisplay">0</div>
+      <div id="speedIndicator">SPEED ×<span id="speedVal">1.0</span></div>
+    </div>
+    <div id="hudRight">
+      <div id="coinHud">💰 <span id="coinCount">0</span></div>
+      <div id="hudHsRow">BEST <span id="hudHs">0</span></div>
+    </div>
+    <div id="perfectBanner"></div>
+    <div id="slowMoBar"><div id="slowMoFill"></div></div>
+  </div>
+
+  <!-- ══ GAME OVER SCREEN ══ -->
+  <div id="gameOverScreen" class="screen">
+    <div class="screen-inner">
+      <h2 class="over-title">YOU FELL</h2>
+
+      <div class="score-cards">
+        <div class="score-card">
+          <div class="sc-lbl">SCORE</div>
+          <div class="sc-val" id="finalScore">0</div>
+        </div>
+        <div class="score-card">
+          <div class="sc-lbl">BEST</div>
+          <div class="sc-val hs-col" id="finalHs">0</div>
+        </div>
+        <div class="score-card">
+          <div class="sc-lbl">💰 EARNED</div>
+          <div class="sc-val coin-col" id="finalCoins">0</div>
+        </div>
+      </div>
+
+      <div class="mono-row">
+        <button id="watchAdBtn" class="btn btn-ad">📺 CONTINUE (Watch Ad)</button>
+        <button id="dblCoinsBtn" class="btn btn-ad">×2 COINS (Watch Ad)</button>
+      </div>
+
+      <div class="restart-row">
+        <button id="restartBtn" class="btn btn-primary">↺ TRY AGAIN</button>
+        <button id="goStoreBtn" class="btn btn-secondary">🛒 STORE</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="game.js"></script>
 </body>
 </html>
