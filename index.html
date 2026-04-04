@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shadow Run — Endless Parkour</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The game canvas: all rendering happens here -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Overlay screens (start / game-over) sit on top of the canvas -->
+  <div id="ui">
+
+    <!-- ── START SCREEN ── -->
+    <div id="startScreen" class="screen active">
+      <div class="screen-inner">
+        <div class="logo-wrap">
+          <span class="logo-accent">⬛</span>
+          <h1 class="logo">SHADOW<br><span>RUN</span></h1>
+        </div>
+        <p class="tagline">Endless Parkour · Sprint into the void</p>
+        <div class="controls-hint">
+          <div class="key-row"><kbd>SPACE</kbd> / <kbd>↑</kbd> — Jump / Double Jump</div>
+          <div class="key-row"><kbd>↓</kbd> / <kbd>S</kbd> — Slide</div>
+          <div class="key-row">Tap / Swipe down on mobile</div>
+        </div>
+        <button id="startBtn" class="btn">START RUNNING</button>
+        <div class="hs-display">Best: <span id="startHs">0</span></div>
+      </div>
+    </div>
+
+    <!-- ── GAME-OVER SCREEN ── -->
+    <div id="gameOverScreen" class="screen">
+      <div class="screen-inner">
+        <h2 class="over-title">YOU FELL</h2>
+        <div class="score-block">
+          <div class="score-label">SCORE</div>
+          <div class="score-value" id="finalScore">0</div>
+        </div>
+        <div class="score-block">
+          <div class="score-label">BEST</div>
+          <div class="score-value hs" id="finalHs">0</div>
+        </div>
+        <button id="restartBtn" class="btn">TRY AGAIN</button>
+      </div>
+    </div>
+
+    <!-- ── HUD (in-game) ── -->
+    <div id="hud">
+      <div id="scoreDisplay">0</div>
+      <div id="hsDisplay">BEST: <span id="hudHs">0</span></div>
+    </div>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
