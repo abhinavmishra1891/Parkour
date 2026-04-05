@@ -1,122 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Shadow Run — Endless Parkour</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Shadow Parkour</title>
+  <style>
+    :root {
+      --bg-a: #050711;
+      --bg-b: #101932;
+      --neon-cyan: #00eaff;
+      --neon-pink: #ff2cff;
+      --neon-gold: #ffd54f;
+      --text: #e6f4ff;
+      --danger: #ff4568;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 20% 0%, #1c2750, var(--bg-a));
+      color: var(--text);
+      touch-action: manipulation;
+    }
+
+    #gameRoot { position: fixed; inset: 0; }
+    #gameCanvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--bg-b), #070b18 60%, #030407);
+    }
+
+    #hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-weight: 700;
+      text-shadow: 0 0 10px rgba(0, 234, 255, 0.45);
+    }
+
+    .panel {
+      background: rgba(5, 9, 22, 0.35);
+      border: 1px solid rgba(0, 234, 255, 0.2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      backdrop-filter: blur(3px);
+    }
+
+    .metric { margin: 4px 0; }
+    .metric b { color: var(--neon-gold); }
+
+    #centerFx {
+      position: fixed;
+      left: 50%;
+      top: 18%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      text-align: center;
+    }
+
+    #perfectText {
+      opacity: 0;
+      font-size: clamp(24px, 4.5vw, 48px);
+      letter-spacing: 2px;
+      color: var(--neon-gold);
+      text-shadow: 0 0 20px rgba(255, 213, 79, 0.85);
+      transition: opacity 140ms ease;
+    }
+
+    #lyric {
+      margin-top: 8px;
+      opacity: 0;
+      font-size: clamp(12px, 2.3vw, 22px);
+      color: var(--text);
+      transition: opacity 160ms ease;
+      text-shadow: 0 0 18px rgba(255, 44, 255, 0.45);
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 50% 30%, rgba(16, 25, 50, 0.68), rgba(3, 5, 12, 0.92));
+      pointer-events: auto;
+    }
+
+    #overlayCard {
+      width: min(560px, 92vw);
+      border-radius: 14px;
+      border: 1px solid rgba(0, 234, 255, 0.3);
+      background: rgba(6, 11, 25, 0.9);
+      padding: 18px;
+      box-shadow: 0 0 24px rgba(0, 234, 255, 0.15);
+    }
+
+    #overlay h1 {
+      margin: 4px 0 8px;
+      color: var(--neon-cyan);
+      letter-spacing: 1px;
+      font-size: clamp(28px, 5vw, 42px);
+      text-shadow: 0 0 20px rgba(0, 234, 255, 0.45);
+    }
+
+    #overlay p { margin: 7px 0; line-height: 1.35; color: #cddfff; }
+    #overlay strong { color: var(--neon-gold); }
+
+    .row {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button, input[type="file"] {
+      pointer-events: auto;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 234, 255, 0.4);
+      background: rgba(6, 20, 38, 0.8);
+      color: var(--text);
+      padding: 10px 12px;
+      font-weight: 700;
+    }
+
+    button:hover { filter: brightness(1.15); }
+
+    #touchHint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #8fb6d6;
+    }
+
+    #debug {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      color: #6a87a0;
+      font-size: 11px;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
-
-<canvas id="gameCanvas"></canvas>
-
-<div id="ui">
-
-  <!-- ══ START SCREEN ══ -->
-  <div id="startScreen" class="screen active">
-    <div class="screen-inner">
-      <div class="logo-wrap">
-        <span class="logo-icon">⬛</span>
-        <div>
-          <h1 class="logo">SHADOW<span>RUN</span></h1>
-          <p class="logo-sub">ENDLESS PARKOUR</p>
-        </div>
-      </div>
-
-      <div class="controls-grid">
-        <div class="ctrl-item"><kbd>SPACE / ↑</kbd><span>Jump</span></div>
-        <div class="ctrl-item"><kbd>SPACE ×2</kbd><span>Double Jump</span></div>
-        <div class="ctrl-item"><kbd>↓ / S</kbd><span>Slide</span></div>
-        <div class="ctrl-item"><span>👆 Tap / Swipe↓</span><span>Mobile</span></div>
-      </div>
-
-      <div class="skin-row-wrap">
-        <div class="skin-label">SKIN SELECT</div>
-        <div class="skin-row" id="startSkinRow"></div>
-      </div>
-
-      <button id="startBtn" class="btn btn-primary">▶&nbsp; START RUN</button>
-
-      <div class="stat-row">
-        <div class="stat"><div class="stat-val" id="startHs">0</div><div class="stat-lbl">BEST</div></div>
-        <div class="stat"><div class="stat-val" id="startCoins">0</div><div class="stat-lbl">💰 COINS</div></div>
-      </div>
-
-      <button id="storeBtn" class="btn btn-secondary">🛒 STORE</button>
-    </div>
+  <div id="gameRoot">
+    <canvas id="gameCanvas" aria-label="Shadow Parkour game canvas"></canvas>
   </div>
 
-  <!-- ══ STORE SCREEN ══ -->
-  <div id="storeScreen" class="screen">
-    <div class="screen-inner store-inner">
-      <h2 class="store-title">STORE</h2>
-      <div class="coin-display">💰 <span id="storeCoinCount">0</span></div>
-
-      <div class="store-section">
-        <div class="store-heading">SKINS</div>
-        <div class="store-grid" id="skinGrid"></div>
-      </div>
-      <div class="store-section">
-        <div class="store-heading">TRAILS</div>
-        <div class="store-grid" id="trailGrid"></div>
-      </div>
-      <div class="store-section">
-        <div class="store-heading">POWER-UPS</div>
-        <div class="store-grid" id="boostGrid"></div>
-      </div>
-
-      <button id="storeCloseBtn" class="btn btn-secondary">← BACK</button>
-    </div>
-  </div>
-
-  <!-- ══ HUD ══ -->
   <div id="hud">
-    <div id="hudLeft">
-      <div id="scoreDisplay">0</div>
-      <div id="speedIndicator">SPEED ×<span id="speedVal">1.0</span></div>
+    <div class="panel">
+      <div class="metric">Score: <b id="score">0</b></div>
+      <div class="metric">Best: <b id="best">0</b></div>
+      <div class="metric">Speed: <b id="speed">1.0x</b></div>
     </div>
-    <div id="hudRight">
-      <div id="coinHud">💰 <span id="coinCount">0</span></div>
-      <div id="hudHsRow">BEST <span id="hudHs">0</span></div>
-    </div>
-    <div id="perfectBanner"></div>
-    <div id="slowMoBar"><div id="slowMoFill"></div></div>
-  </div>
-
-  <!-- ══ GAME OVER SCREEN ══ -->
-  <div id="gameOverScreen" class="screen">
-    <div class="screen-inner">
-      <h2 class="over-title">YOU FELL</h2>
-
-      <div class="score-cards">
-        <div class="score-card">
-          <div class="sc-lbl">SCORE</div>
-          <div class="sc-val" id="finalScore">0</div>
-        </div>
-        <div class="score-card">
-          <div class="sc-lbl">BEST</div>
-          <div class="sc-val hs-col" id="finalHs">0</div>
-        </div>
-        <div class="score-card">
-          <div class="sc-lbl">💰 EARNED</div>
-          <div class="sc-val coin-col" id="finalCoins">0</div>
-        </div>
-      </div>
-
-      <div class="mono-row">
-        <button id="watchAdBtn" class="btn btn-ad">📺 CONTINUE (Watch Ad)</button>
-        <button id="dblCoinsBtn" class="btn btn-ad">×2 COINS (Watch Ad)</button>
-      </div>
-
-      <div class="restart-row">
-        <button id="restartBtn" class="btn btn-primary">↺ TRY AGAIN</button>
-        <button id="goStoreBtn" class="btn btn-secondary">🛒 STORE</button>
-      </div>
+    <div class="panel">
+      <div class="metric">Coins: <b id="coins">0</b></div>
+      <div class="metric">State: <b id="state">RUNNING</b></div>
+      <div class="metric">FPS: <b id="fps">--</b></div>
     </div>
   </div>
 
-</div>
+  <div id="centerFx">
+    <div id="perfectText">PERFECT JUMP!</div>
+    <div id="lyric"></div>
+  </div>
 
-<script src="game.js"></script>
+  <div id="overlay">
+    <div id="overlayCard">
+      <h1>Shadow Parkour</h1>
+      <p>Neon endless runner with <strong>gravity + jump + double jump</strong>, perfect jumps, slow motion, beat-reactive visuals, and mobile touch controls.</p>
+      <p>Controls: <strong>Space / W / ArrowUp / Tap</strong> to jump, <strong>R</strong> to restart after crash.</p>
+      <p>Optional music: choose an audio file to enable beat sync and lyric display.</p>
+
+      <div class="row">
+        <input id="musicInput" type="file" accept="audio/*" />
+        <button id="startBtn" type="button">Start Run</button>
+      </div>
+      <p id="touchHint">Tip: Tap anywhere for jump; double-tap quickly for double jump.</p>
+    </div>
+  </div>
+
+  <div id="debug">Shadow Parkour • Canvas + JS • No external dependencies</div>
+
+  <script src="ui.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
